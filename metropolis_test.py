@@ -31,3 +31,14 @@ def metropolis_sampler(target_density, proposal_sampler, initial_state, num_samp
         samples[i] = current_state
 
     return samples
+
+
+def boltzmann(state, T, k_B=1.380649e-23):
+    """
+    Unnormalized Boltzmann distribution for a given state.
+    """
+    E = -np.sum(state)  # Example energy function (negative sum of spins)
+    return np.exp(-E/(k_B*T))
+
+# Example usage for Ising model:
+metropolis_sampler(boltzmann, proposal_sampler, initial_state, num_samples)
