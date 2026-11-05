@@ -80,7 +80,7 @@ for i in range(LATTICE_SIZE):
 
 
 # Ecalc function for the Ising model
-def Ecalc_initial(state):
+def Ecalc(state):
     """
     Calculate the energy of a given state in the Ising model.
     """
@@ -94,8 +94,22 @@ def Ecalc_initial(state):
                 energy -= J * spin * neighbor_spin  # Interaction energy
     return energy / 2  # Each pair counted twice
 
-def Ecalc_it(E_old, state, i, j):
-    """ Calculate the new energy of the given state more efficiently by only considering the change in energy due to a single spin flip. """
+
+# Running it at 1 temperature, seeing the magnetization as a function of sim time
+class State:
+    def __init__(self, lattice_size):
+        self.lattice_size = lattice_size
+        self.state = np.random.choice([-1, 1], size=(lattice_size, lattice_size))
+
+    def flip_spin(self, i, j):
+        self.state[i, j] *= -1
+
+    def get_state(self):
+        return self.state
+
+    def set_state(self, new_state):
+        self.state = new_state 
+
 # Constants
 
 # 
