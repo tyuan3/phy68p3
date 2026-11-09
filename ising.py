@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from ising_ac import compute_acf, compute_acf_fft
 
 class State:
     def __init__(self, lattice_size, J=1.0):
@@ -130,7 +131,7 @@ def plot_histogram(ax, samples, xlabel, bins=50):
     ax.legend()
 
 # Discard burn-in (equilibration) before building the histograms
-burn_in = 50_000
+burn_in = 100_000
 m_samples = mags[burn_in:]
 e_samples = energies[burn_in:] / L**2
 
