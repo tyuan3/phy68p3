@@ -1,15 +1,20 @@
+import os
 import time
 import numpy as np
+import pandas as pd
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 np.random.seed(0)
 
+OUT_DIR = os.path.join(os.getcwd(), "plots")   # ./plots relative to where you run the script
+os.makedirs(OUT_DIR, exist_ok=True)
+
 L = 20
 J = 1.0
 k_B = 1.0
-temps = np.linspace(0.0, 5.0, 51)   # step = 0.1
+temps = np.linspace(0.5, 5.0, 46)   # step = 0.1
 num_iterations = 1_000_000
 burn_in = 500_000
 chunk = 50_000
@@ -19,6 +24,7 @@ idx = np.arange(nT)
 # Padded lattices: zero border => open boundaries, neighbour sum is just the 4 neighbours
 P = np.zeros((nT, L + 2, L + 2), dtype=np.int8)
 P[:, 1:-1, 1:-1] = np.random.choice([-1, 1], size=(nT, L, L))
+P[temps < 2.0, 1:-1, 1:-1] = 1   # start low-T lattices fully ordered, comment out for incorrect results for slides
 
 def total_energy(P):
     c = P[:, 1:-1, 1:-1].astype(np.int64)
@@ -75,6 +81,7 @@ print(f"Tc from chi peak          : {Tc_chi:.2f}")
 print(f"Tc from C peak            : {Tc_C:.2f}")
 print("Onsager infinite-lattice  : 2.269")
 
+# Plot
 fig, ax = plt.subplots(figsize=(7, 4.5))
 ax.plot(temps, absm, "o-", ms=4, label=r"$\langle |m| \rangle$")
 ax.axvline(Tc_chi, color="r", ls="--", label=f"$T_c$ est. (χ peak) ≈ {Tc_chi:.2f}")
@@ -84,6 +91,14 @@ ax.set_ylabel("Mean |magnetization| per spin")
 ax.set_title(f"2D Ising model (open boundaries), L={L}")
 ax.legend()
 plt.tight_layout()
-plt.savefig("/Users/theodoreyuan/Downloads/phy68/phy68p3/plots/ising_curve.png", dpi=150)
+plt.savefig(os.path.join(OUT_DIR, "ising_curve.png"), dpi=300)
 
-# np.savez("/Users/theodoreyuan/Downloads/phy68/phy68p3/plots/ising_sweep_results.npz", temps=temps, absm=absm, e=e_mean, chi=chi, C=C)
+# Results table (one row per temperature) -> CSV
+df = pd.DataFrame({
+    "temperature": temps,
+    "mean_abs_magnetization_per_spin": absm,
+    "mean_energy_per_spin": e_mean,
+    "susceptibility_chi": chi,
+    "specific_heat_C": C,
+})
+df.to_csv(os.path.join(OUT_DIR, "ising_sweep_results.csv"), index=False, float_format="%.6f")
